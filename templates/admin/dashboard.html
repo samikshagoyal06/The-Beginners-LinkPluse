@@ -1,0 +1,123 @@
+{% extends "admin/base.html" %}
+{% block title %}Admin Dashboard — LinkPulse{% endblock %}
+{% block content %}
+<div class="dashboard-header">
+    <div>
+        <h1 class="page-title">Platform Dashboard</h1>
+        <p class="page-description">Overview of platform health, users, and activity.</p>
+    </div>
+</div>
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="stat-value">{{ total_users }}</div>
+        <div class="stat-label">Total Users</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div class="stat-value">{{ active_users }}</div>
+        <div class="stat-label">Active Users</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        </div>
+        <div class="stat-value">{{ total_links }}</div>
+        <div class="stat-label">Total Links</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="stat-value">{{ active_links }}</div>
+        <div class="stat-label">Active Links</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <div class="stat-value">{{ total_clicks }}</div>
+        <div class="stat-label">Total Clicks</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="stat-value">{{ blocked_domains }}</div>
+        <div class="stat-label">Blocked Domains</div>
+    </div>
+</div>
+<div class="dashboard-grid">
+    <div class="card">
+        <h3 class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;color:var(--brand-600)">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            Recent Audit Log
+        </h3>
+        {% if recent_audit %}
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th>Target</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in recent_audit %}
+                    <tr>
+                        <td>{{ log.action }}</td>
+                        <td>{{ log.target_type }} #{{ log.target_id }}</td>
+                        <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state-compact">
+            <p class="text-muted">No audit entries yet.</p>
+        </div>
+        {% endif %}
+    </div>
+    <div class="card">
+        <h3 class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;color:var(--danger)">
+                <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+            Disabled Links
+        </h3>
+        {% if disabled_links %}
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>URL</th>
+                        <th>Owner</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for link in disabled_links %}
+                    <tr>
+                        <td><code>{{ link.short_code }}</code></td>
+                        <td class="truncate-url" title="{{ link.original_url }}">{{ link.original_url[:40] }}{% if link.original_url|length > 40 %}…{% endif %}</td>
+                        <td>{{ link.owner.email if link.owner else '—' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state-compact">
+            <p class="text-muted">No disabled links.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

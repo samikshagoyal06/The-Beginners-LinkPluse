@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — LinkPulse{% endblock %}
+
+{% block content %}
+<div class="container dashboard-page">
+    <div class="dashboard-header">
+        <h1 class="page-title">Dashboard</h1>
+        <a href="{{ url_for('landing') }}" class="btn btn-primary">+ New Link</a>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-value">{{ total_links }}</div>
+            <div class="stat-label">Total Links</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ total_clicks }}</div>
+            <div class="stat-label">Total Clicks</div>
+        </div>
+    </div>
+
+    {% if links %}
+    <div class="table-controls">
+        <input
+            type="text"
+            id="searchInput"
+            class="form-input search-input"
+            placeholder="Search links..."
+            aria-label="Search links"
+        >
+    </div>
+
+    <div class="table-wrapper">
+        <table class="data-table" id="linksTable">
+            <thead>
+                <tr>
+                    <th class="sortable" data-sort="url" onclick="sortTable('url')">
+                        Original URL <span class="sort-arrow"></span>
+                    </th>
+                    <th class="sortable" data-sort="short" onclick="sortTable('short')">
+                        Short Link <span class="sort-arrow"></span>
+                    </th>
+                    <th class="sortable" data-sort="clicks" onclick="sortTable('clicks')">
+                        Clicks <span class="sort-arrow"></span>
+                    </th>
+                    <th class="sortable" data-sort="created" onclick="sortTable('created')">
+                        Created <span class="sort-arrow"></span>
+                    </th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for link in links %}
+                <tr class="link-row"
+                    data-url="{{ link.original_url }}"
+                    data-short="{{ link.short_code }}"
+                    data-clicks="{{ link.click_count }}"
+                    data-created="{{ link.created_at.strftime('%Y-%m-%d %H:%M') }}">
+                    <td class="td-url">
+                        <a href="{{ link.original_url }}" target="_blank" rel="noopener noreferrer" title="{{ link.original_url }}">
+                            {{ link.original_url[:60] }}{% if link.original_url|length > 60 %}...{% endif %}
+                        </a>
+                    </td>
+                    <td class="td-short">
+                        <code class="short-code" id="code-{{ link.id }}">
+                            {{ request.scheme }}://{{ request.host }}/s/{{ link.short_code }}
+                        </code>
+                        <button class="btn-icon btn-copy-sm" onclick="copyToClipboard('code-{{ link.id }}')" aria-label="Copy short link">
+                            📋
+                        </button>
+                    </td>
+                    <td>{{ link.click_count }}</td>
+                    <td>{{ link.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>
+                        {% if not link.is_active %}
+                            <span class="badge badge-disabled">Disabled</span>
+                        {% elif link.is_expired() %}
+                            <span class="badge badge-expired">Expired</span>
+                        {% else %}
+                            <span class="badge badge-active">Active</span>
+                        {% endif %}
+                    </td>
+                    <td class="td-actions">
+                        <a href="{{ url_for('link_detail', link_id=link.id) }}" class="btn btn-sm btn-outline">Details</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">🔗</div>
+        <h3>No links yet</h3>
+        <p>Create your first short link to see it here.</p>
+        <a href="{{ url_for('landing') }}" class="btn btn-primary">Create a Link</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

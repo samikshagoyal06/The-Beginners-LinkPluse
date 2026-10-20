@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Links — LinkPulse{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="dashboard-header">
+        <div>
+            <h1 class="page-title">My Links</h1>
+            <p class="page-description">Manage and monitor all your shortened links.</p>
+        </div>
+        <a href="{{ url_for('user.create_link') }}" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            New Link
+        </a>
+    </div>
+
+    <div class="table-controls">
+        <form method="GET" class="filter-form">
+            <input type="text" name="search" value="{{ search }}" class="form-input search-input" placeholder="Search links...">
+            <select name="status" class="form-input form-select">
+                <option value="">All Status</option>
+                <option value="active" {% if status == 'active' %}selected{% endif %}>Active</option>
+                <option value="disabled" {% if status == 'disabled' %}selected{% endif %}>Disabled</option>
+            </select>
+            {% if campaigns %}
+            <select name="campaign_id" class="form-input form-select">
+                <option value="">All Campaigns</option>
+                {% for c in campaigns %}
+                <option value="{{ c.id }}" {% if request.args.get('campaign_id') == c.id|string %}selected{% endif %}>{{ c.name }}</option>
+                {% endfor %}
+            </select>
+            {% endif %}
+            <select name="sort" class="form-input form-select">
+                <option value="created_at" {% if sort == 'created_at' %}selected{% endif %}>Date</option>
+                <option value="clicks" {% if sort == 'clicks' %}selected{% endif %}>Clicks</option>
+                <option value="url" {% if sort == 'url' %}selected{% endif %}>URL</option>
+            </select>
+            <select name="order" class="form-input form-select">
+                <option value="desc" {% if order == 'desc' %}selected{% endif %}>Newest</option>
+                <option value="asc" {% if order == 'asc' %}selected{% endif %}>Oldest</option>
+            </select>
+            <button type="submit" class="btn btn-outline btn-sm">Apply</button>
+        </form>
+    </div>
+
+    {% if pagination.items %}
+    <div class="dashboard-section" style="padding:0;">
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>URL</th>
+                        <th>Short Code</th>
+                        <th>Clicks</th>
+                        <th>Created</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for link in pagination.items %}
+                    <tr>
+                        <td class="td-url">
+                            <a href="{{ link.original_url }}" target="_blank" rel="noopener noreferrer" class="url-truncated" title="{{ link.original_url }}">
+                                {{ link.original_url[:50] }}{% if link.original_url|length > 50 %}...{% endif %}
+                            </a>
+                        </td>
+                        <td>
+                            <code class="short-code" id="code-{{ link.id }}">{{ link.short_code }}</code>
+                            <button class="btn-copy-sm" onclick="copyToClipboard('code-{{ link.id }}')" title="Copy" aria-label="Copy short code">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                </svg>
+                            </button>
+                        </td>
+                        <td>{{ link.click_count }}</td>
+                        <td>{{ link.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td>
+                            {% if not link.is_active %}
+                                <span class="badge badge-disabled">Disabled</span>
+                            {% elif link.is_expired() %}
+                                <span class="badge badge-expired">Expired</span>
+                            {% else %}
+                                <span class="badge badge-active">Active</span>
+                            {% endif %}
+                        </td>
+                        <td class="td-actions">
+                            <a href="{{ url_for('user.link_detail', link_id=link.id) }}" class="btn btn-ghost btn-sm">Details →</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="pagination">
+        {% if pagination.has_prev %}
+            <a href="{{ url_for('user.links', page=pagination.prev_num, search=search, status=status, sort=sort, order=order) }}" class="btn btn-outline btn-sm">← Prev</a>
+        {% endif %}
+        <span class="page-info">Page {{ pagination.page }} of {{ pagination.pages }}</span>
+        {% if pagination.has_next %}
+            <a href="{{ url_for('user.links', page=pagination.next_num, search=search, status=status, sort=sort, order=order) }}" class="btn btn-outline btn-sm">Next →</a>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+            </svg>
+        </div>
+        <h3>No links found</h3>
+        <p>{% if search or status %}Try adjusting your filters.{% else %}Create your first short link.{% endif %}</p>
+        <a href="{{ url_for('user.create_link') }}" class="btn btn-primary">Create a Link</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

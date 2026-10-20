@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Import Preview — LinkPulse{% endblock %}
+{% block content %}
+<div class="container dashboard-page">
+    <div class="dashboard-header">
+        <div>
+            <h1 class="page-title">Import Preview</h1>
+            <p class="page-description">Review your CSV data before importing.</p>
+        </div>
+        <a href="{{ url_for('import_export.upload_csv') }}" class="btn btn-outline">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            Upload Different File
+        </a>
+    </div>
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-value">{{ total }}</div>
+            <div class="stat-label">Total Rows</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" style="color:var(--success)">{{ valid_rows|length }}</div>
+            <div class="stat-label">Valid</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" style="color:var(--danger)">{{ invalid_rows|length }}</div>
+            <div class="stat-label">Invalid</div>
+        </div>
+    </div>
+    {% if invalid_rows %}
+    <div class="card">
+        <h3 class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;color:var(--danger)">
+                <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+            Invalid Rows
+        </h3>
+        <ul class="error-list">
+            {% for row in invalid_rows %}
+            <li class="error-list-item">
+                <span class="error-row">Row {{ row.row }}</span>
+                <span class="error-url">{{ row.url }}</span>
+                <span class="error-message">{{ row.error }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    {% if valid_rows %}
+    <div class="card">
+        <h3 class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;color:var(--success)">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            Valid Rows ({{ valid_rows|length }})
+        </h3>
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Row</th>
+                        <th>URL</th>
+                        <th>Title</th>
+                        <th>Alias</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in valid_rows[:20] %}
+                    <tr>
+                        <td>{{ row.row }}</td>
+                        <td class="truncate-url" title="{{ row.url }}">{{ row.url[:60] }}{% if row.url|length > 60 %}…{% endif %}</td>
+                        <td>{{ row.title or '—' }}</td>
+                        <td>{{ row.alias or '—' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if valid_rows|length > 20 %}
+        <p class="text-muted" style="margin-top:var(--space-sm)">Showing 20 of {{ valid_rows|length }} valid rows.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+    <div class="card" style="margin-top:var(--space-md)">
+        <form action="{{ url_for('import_export.upload_csv') }}" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="csv_file" class="form-label">Re-upload CSV</label>
+                <input type="file" id="csv_file" name="csv_file" class="form-input" accept=".csv" required>
+            </div>
+            <button type="submit" name="action" value="import" class="btn btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+                Import {{ valid_rows|length }} Valid Links
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

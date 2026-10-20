@@ -1,0 +1,57 @@
+{% extends "admin/base.html" %}
+{% block title %}Audit Logs — Admin{% endblock %}
+{% block content %}
+<div class="dashboard-header">
+    <div>
+        <h1 class="page-title">Audit Logs</h1>
+        <p class="page-description">Track all administrative actions taken on the platform.</p>
+    </div>
+</div>
+{% if pagination.items %}
+<div class="card" style="padding:0;overflow:hidden;">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Admin</th>
+                <th>Action</th>
+                <th>Target</th>
+                <th>Reason</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in pagination.items %}
+            <tr>
+                <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ log.admin.email if log.admin else 'System' }}</td>
+                <td>{{ log.action }}</td>
+                <td>{{ log.target_type }} #{{ log.target_id }}</td>
+                <td>{{ log.reason or '—' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div class="pagination">
+    {% if pagination.has_prev %}<a href="{{ url_for('admin.audit_logs', page=pagination.prev_num) }}" class="btn btn-sm btn-outline">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Prev
+    </a>{% endif %}
+    <span>Page {{ pagination.page }} of {{ pagination.pages }}</span>
+    {% if pagination.has_next %}<a href="{{ url_for('admin.audit_logs', page=pagination.next_num) }}" class="btn btn-sm btn-outline">
+        Next
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>{% endif %}
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:64px;height:64px;color:var(--gray-300)">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+        </svg>
+    </div>
+    <h3>No audit entries</h3>
+    <p>Audit logs will appear here when administrative actions are taken.</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: linkpulse
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn -b 0.0.0.0:$PORT app:app"
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URI
+        fromDatabase:
+          name: linkpulse-db
+          property: connectionString
+
+databases:
+  - name: linkpulse-db
+    plan: free
+    databaseName: linkpulse

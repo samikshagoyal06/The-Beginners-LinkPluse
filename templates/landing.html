@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}LinkPulse — Shorten Your Links{% endblock %}
+
+{% block content %}
+<div class="container landing-page">
+    <div class="hero">
+        <h1 class="hero-title">Shorten Your Links, Track Your Impact</h1>
+        <p class="hero-subtitle">
+            Create short, shareable links in seconds. Track clicks and manage your URLs from a clean dashboard.
+        </p>
+    </div>
+
+    <div class="shorten-card">
+        <form action="{{ url_for('shorten') }}" method="POST" class="shorten-form" id="shortenForm">
+            <div class="form-group">
+                <label for="url" class="form-label">Enter your long URL</label>
+                <input
+                    type="text"
+                    id="url"
+                    name="url"
+                    class="form-input"
+                    placeholder="https://example.com/very/long/url/here"
+                    required
+                    autocomplete="url"
+                    aria-describedby="urlHelp"
+                >
+                <small id="urlHelp" class="form-help">Only HTTP and HTTPS links are accepted.</small>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="alias" class="form-label">Custom alias <span class="optional">(optional)</span></label>
+                    <input
+                        type="text"
+                        id="alias"
+                        name="alias"
+                        class="form-input"
+                        placeholder="my-link"
+                        pattern="[a-zA-Z0-9_-]+"
+                        title="Letters, numbers, hyphens, and underscores only"
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="expires" class="form-label">Expires in <span class="optional">(optional)</span></label>
+                    <input
+                        type="text"
+                        id="expires"
+                        name="expires"
+                        class="form-input"
+                        placeholder="1h, 30m, 7d"
+                        title="e.g. 1h for 1 hour, 30m for 30 minutes, 7d for 7 days"
+                    >
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" id="shortenBtn">
+                Shorten URL
+            </button>
+        </form>
+
+        <div id="resultArea" class="result-area" style="display:none;">
+            <p class="result-label">Your short link:</p>
+            <div class="result-url">
+                <code id="shortUrl"></code>
+                <button class="btn btn-sm btn-copy" onclick="copyToClipboard('shortUrl')" aria-label="Copy short link">
+                    📋 Copy
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="features">
+        <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3>Fast & Simple</h3>
+            <p>Paste a URL and get a short link instantly. No sign-up required.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>Click Analytics</h3>
+            <p>Track how many people click your links with real-time statistics.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🔒</div>
+            <h3>Safe & Secure</h3>
+            <p>Links are validated and protected. Disable or delete anytime.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Set New Password — LinkPulse{% endblock %}
+
+{% block content %}
+<div class="container auth-page">
+    <div class="auth-card">
+        <div class="auth-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px">
+                <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+            </svg>
+            <h1 class="auth-title">Set New Password</h1>
+            <p class="auth-subtitle">Choose a strong password for your account.</p>
+        </div>
+        <form action="{{ url_for('auth.reset_password_confirm', token=token) }}" method="POST" class="auth-form">
+            <div class="form-group">
+                <label for="password" class="form-label">New Password</label>
+                <input type="password" id="password" name="password" class="form-input" required minlength="8" autofocus placeholder="Min 8 characters">
+                <p class="form-help">At least 8 characters</p>
+            </div>
+            <div class="form-group">
+                <label for="confirm_password" class="form-label">Confirm Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" class="form-input" required minlength="8" placeholder="Re-enter your password">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Update Password</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

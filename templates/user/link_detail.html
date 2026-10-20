@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Link Details — LinkPulse{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="detail-header">
+        <a href="{{ url_for('user.links') }}" class="btn btn-ghost btn-sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Back to Links
+        </a>
+    </div>
+
+    <div class="card">
+        <h1 class="detail-title">{{ link.title or link.short_code }}</h1>
+        <div class="detail-info">
+            <div class="info-row">
+                <span class="info-label">Short Link</span>
+                <div class="info-value">
+                    <code class="short-code" id="detailCode">{{ link.short_url() }}</code>
+                    <button class="btn-copy-sm" onclick="copyToClipboard('detailCode')" title="Copy" aria-label="Copy short link">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Original URL</span>
+                <div class="info-value"><a href="{{ link.original_url }}" target="_blank" rel="noopener noreferrer">{{ link.original_url }}</a></div>
+            </div>
+            {% if link.title %}
+            <div class="info-row">
+                <span class="info-label">Title</span>
+                <div class="info-value">{{ link.title }}</div>
+            </div>
+            {% endif %}
+            <div class="info-row">
+                <span class="info-label">Status</span>
+                <div class="info-value">
+                    {% if not link.is_active %}<span class="badge badge-disabled">Disabled</span>
+                    {% elif link.is_expired() %}<span class="badge badge-expired">Expired</span>
+                    {% else %}<span class="badge badge-active">Active</span>{% endif %}
+                </div>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Total Clicks</span>
+                <div class="info-value">{{ link.click_count }}</div>
+            </div>
+            {% if link.max_clicks %}
+            <div class="info-row">
+                <span class="info-label">Max Clicks</span>
+                <div class="info-value">{{ link.max_clicks }}</div>
+            </div>
+            {% endif %}
+            <div class="info-row">
+                <span class="info-label">Created</span>
+                <div class="info-value">{{ link.created_at.strftime('%Y-%m-%d %H:%M UTC') }}</div>
+            </div>
+            {% if link.expires_at %}
+            <div class="info-row">
+                <span class="info-label">Expires</span>
+                <div class="info-value">{{ link.expires_at.strftime('%Y-%m-%d %H:%M UTC') }}</div>
+            </div>
+            {% endif %}
+        </div>
+        <div class="detail-actions">
+            <form action="{{ url_for('user.toggle_link', link_id=link.id) }}" method="POST" style="display:inline;">
+                <button type="submit" class="btn {% if link.is_active %}btn-warning{% else %}btn-success{% endif %}">
+                    {% if link.is_active %}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+                        Disable
+                    {% else %}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        Enable
+                    {% endif %}
+                </button>
+            </form>
+            <a href="{{ url_for('user.qr_code', link_id=link.id) }}" class="btn btn-outline">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="2"/>
+                    <path d="M7 7h3v3H7zM14 7h3v3h-3zM7 14h3v3H7zM14 14h3v3h-3z"/>
+                </svg>
+                QR Code
+            </a>
+            <form action="{{ url_for('user.delete_link', link_id=link.id) }}" method="POST" style="display:inline;"
+                  onsubmit="return confirm('Delete this link? This cannot be undone.');">
+                <button type="submit" class="btn btn-danger">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                    Delete
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="chart-card">
+        <h2 class="chart-title">Clicks Over Time</h2>
+        {% if link.click_count > 0 %}
+        <canvas id="clicksChart" height="80"></canvas>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+                </svg>
+            </div>
+            <h3>No clicks yet</h3>
+            <p>Share your link and see clicks appear here.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+{% if link.click_count > 0 %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('{{ url_for("user.link_analytics", link_id=link.id) }}')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var labels = Object.keys(data.daily_clicks);
+            var values = Object.values(data.daily_clicks);
+            if (labels.length === 0) return;
+            new Chart(document.getElementById('clicksChart'), {
+                type: 'line',
+                data: { labels: labels, datasets: [{ label: 'Clicks', data: values, borderColor: '#4f46e5', backgroundColor: 'rgba(79,70,229,0.08)', fill: true, tension: 0.3, pointRadius: 2, pointHoverRadius: 4 }] },
+                options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: '#f3f4f6' } } } }
+            });
+        });
+});
+</script>
+{% endif %}
+{% endblock %}

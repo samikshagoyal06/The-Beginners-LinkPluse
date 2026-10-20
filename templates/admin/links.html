@@ -1,0 +1,88 @@
+{% extends "admin/base.html" %}
+{% block title %}Links — Admin{% endblock %}
+{% block content %}
+<div class="dashboard-header">
+    <div>
+        <h1 class="page-title">Link Moderation</h1>
+        <p class="page-description">Search, inspect, and manage all links on the platform.</p>
+    </div>
+    <form method="GET" class="filter-form">
+        <input type="text" name="search" value="{{ search }}" class="form-input" placeholder="Search links, URLs, or owners...">
+        <button type="submit" class="btn btn-outline">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Search
+        </button>
+    </form>
+</div>
+{% if pagination.items %}
+<div class="card" style="padding:0;overflow:hidden;">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Destination</th>
+                <th>Owner</th>
+                <th>Clicks</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for link in pagination.items %}
+            <tr>
+                <td><code>{{ link.short_code }}</code></td>
+                <td class="truncate-url" title="{{ link.original_url }}">{{ link.original_url[:50] }}{% if link.original_url|length > 50 %}…{% endif %}</td>
+                <td>{{ link.owner.email if link.owner else '—' }}</td>
+                <td>{{ link.click_count }}</td>
+                <td>
+                    {% if link.is_active %}
+                        <span class="badge badge-active">Active</span>
+                    {% else %}
+                        <span class="badge badge-disabled">Disabled</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if link.is_active %}
+                    <form action="{{ url_for('admin.disable_link', link_id=link.id) }}" method="POST" style="display:inline;">
+                        <button class="btn btn-sm btn-warning" onclick="return confirm('Disable this link? It will no longer redirect.')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                            Disable
+                        </button>
+                    </form>
+                    {% else %}
+                    <form action="{{ url_for('admin.enable_link', link_id=link.id) }}" method="POST" style="display:inline;">
+                        <button class="btn btn-sm btn-success">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            Enable
+                        </button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div class="pagination">
+    {% if pagination.has_prev %}<a href="{{ url_for('admin.links', page=pagination.prev_num) }}" class="btn btn-sm btn-outline">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Prev
+    </a>{% endif %}
+    <span>Page {{ pagination.page }} of {{ pagination.pages }}</span>
+    {% if pagination.has_next %}<a href="{{ url_for('admin.links', page=pagination.next_num) }}" class="btn btn-sm btn-outline">
+        Next
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>{% endif %}
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:64px;height:64px;color:var(--gray-300)">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+        </svg>
+    </div>
+    <h3>No links found</h3>
+    <p>Try adjusting your search criteria.</p>
+</div>
+{% endif %}
+{% endblock %}

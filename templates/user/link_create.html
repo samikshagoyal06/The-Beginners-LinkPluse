@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Create Link — LinkPulse{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:640px;">
+    <div class="dashboard-header">
+        <div>
+            <h1 class="page-title">Create New Link</h1>
+            <p class="page-description">Enter your destination URL and configure link options.</p>
+        </div>
+        <a href="{{ url_for('user.links') }}" class="btn btn-ghost btn-sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Back
+        </a>
+    </div>
+
+    <div class="card">
+        <form action="{{ url_for('user.create_link') }}" method="POST">
+            <div class="form-section">
+                <h3>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;vertical-align:-2px;margin-right:4px">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                    </svg>
+                    Destination
+                </h3>
+                <div class="form-group">
+                    <label for="url" class="form-label">Destination URL</label>
+                    <input type="text" id="url" name="url" class="form-input" required placeholder="https://example.com/long/url">
+                    <p class="form-help">Only HTTP and HTTPS URLs are allowed.</p>
+                </div>
+                <div class="form-group">
+                    <label for="title" class="form-label">Title <span class="optional">optional</span></label>
+                    <input type="text" id="title" name="title" class="form-input" placeholder="My awesome link">
+                </div>
+                <div class="form-group">
+                    <label for="alias" class="form-label">Custom alias <span class="optional">optional</span></label>
+                    <input type="text" id="alias" name="alias" class="form-input" placeholder="my-link" pattern="[a-zA-Z0-9_-]+">
+                    <p class="form-help">Letters, numbers, hyphens, and underscores only.</p>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;vertical-align:-2px;margin-right:4px">
+                        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    Rules &amp; Options
+                </h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password <span class="optional">optional</span></label>
+                        <input type="password" id="password" name="password" class="form-input" placeholder="Protect this link">
+                    </div>
+                    <div class="form-group">
+                        <label for="max_clicks" class="form-label">Max clicks <span class="optional">optional</span></label>
+                        <input type="number" id="max_clicks" name="max_clicks" class="form-input" placeholder="Unlimited" min="1">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="expires" class="form-label">Expires in <span class="optional">optional</span></label>
+                    <input type="text" id="expires" name="expires" class="form-input" placeholder="1h, 30m, 7d">
+                    <p class="form-help">Examples: 1h (1 hour), 30m (30 minutes), 7d (7 days).</p>
+                </div>
+                <div class="form-group">
+                    <label for="campaign_id" class="form-label">Campaign <span class="optional">optional</span></label>
+                    <select id="campaign_id" name="campaign_id" class="form-input form-select">
+                        <option value="">No campaign</option>
+                        {% for c in campaigns %}
+                        <option value="{{ c.id }}">{{ c.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tags" class="form-label">Tags <span class="optional">comma-separated</span></label>
+                    <input type="text" id="tags" name="tags" class="form-input" placeholder="marketing, social, summer">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                </svg>
+                Create Link
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

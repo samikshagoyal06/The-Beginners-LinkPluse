@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}{{ campaign.name }} — LinkPulse{% endblock %}
+{% block content %}
+<div class="container dashboard-page">
+    <div class="dashboard-header">
+        <div>
+            <h1 class="page-title">{{ campaign.name }}</h1>
+            <p class="page-description">{{ campaign.description or 'Links in this campaign' }}</p>
+        </div>
+        <a href="{{ url_for('campaigns.list_campaigns') }}" class="btn btn-outline">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            Back to Campaigns
+        </a>
+    </div>
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            </div>
+            <div class="stat-value">{{ links|length }}</div>
+            <div class="stat-label">Links</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div class="stat-value">{{ campaign.total_clicks() }}</div>
+            <div class="stat-label">Total Clicks</div>
+        </div>
+    </div>
+    {% if links %}
+    <div class="card" style="padding:0; overflow:hidden;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Short URL</th>
+                    <th>Destination</th>
+                    <th>Clicks</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for link in links %}
+                <tr>
+                    <td>
+                        <a href="{{ url_for('links.link_detail', link_id=link.id) }}" class="link-code">
+                            <code>{{ link.short_code }}</code>
+                        </a>
+                    </td>
+                    <td>
+                        <a href="{{ link.original_url }}" target="_blank" rel="noopener" class="truncate-url" title="{{ link.original_url }}">
+                            {{ link.original_url[:60] }}{% if link.original_url|length > 60 %}…{% endif %}
+                        </a>
+                    </td>
+                    <td>{{ link.click_count }}</td>
+                    <td>
+                        {% if link.is_active %}
+                            <span class="badge badge-active">Active</span>
+                        {% else %}
+                            <span class="badge badge-disabled">Disabled</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ link.created_at.strftime('%Y-%m-%d') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:64px;height:64px;color:var(--gray-300)">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+            </svg>
+        </div>
+        <h3>No links in this campaign</h3>
+        <p>Create a new link and assign it to this campaign.</p>
+        <a href="{{ url_for('user.create_link') }}" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Create Link
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

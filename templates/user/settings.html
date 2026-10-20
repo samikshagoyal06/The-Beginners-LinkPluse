@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Settings — LinkPulse{% endblock %}
+{% block content %}
+<div class="container dashboard-page">
+    <div class="dashboard-header">
+        <div>
+            <h1 class="page-title">Account Settings</h1>
+            <p class="page-description">Manage your profile information and security settings.</p>
+        </div>
+    </div>
+    <div class="card">
+        <h3 class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;color:var(--brand-600)">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+            Profile
+        </h3>
+        <form action="{{ url_for('user.settings') }}" method="POST">
+            <div class="form-group">
+                <label for="display_name" class="form-label">Display Name</label>
+                <input type="text" id="display_name" name="display_name" class="form-input" value="{{ user.display_name or '' }}" placeholder="Your name">
+            </div>
+            <div class="form-group">
+                <label for="email" class="form-label">Email</label>
+                <input type="text" id="email" class="form-input" value="{{ user.email }}" disabled style="background:var(--gray-50);color:var(--gray-500);">
+                <p class="form-help">Email cannot be changed</p>
+            </div>
+        </form>
+    </div>
+    <div class="card" style="margin-top:var(--space-md)">
+        <h3 class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;color:var(--brand-600)">
+                <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+            </svg>
+            Change Password
+        </h3>
+        <form action="{{ url_for('user.settings') }}" method="POST">
+            <div class="form-group">
+                <label for="current_password" class="form-label">Current Password</label>
+                <input type="password" id="current_password" name="current_password" class="form-input" placeholder="Enter your current password">
+            </div>
+            <div class="form-group">
+                <label for="new_password" class="form-label">New Password</label>
+                <input type="password" id="new_password" name="new_password" class="form-input" placeholder="Min 8 characters">
+                <p class="form-help">At least 8 characters</p>
+            </div>
+            <div class="form-group">
+                <label for="confirm_password" class="form-label">Confirm New Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" class="form-input" placeholder="Re-enter your new password">
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

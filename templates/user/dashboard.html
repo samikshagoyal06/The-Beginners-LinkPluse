@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — LinkPulse{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="dashboard-header">
+        <div>
+            <h1 class="page-title">Dashboard</h1>
+            <p class="page-description">Welcome back, {{ user.display_name or user.email }}. Here's your link overview.</p>
+        </div>
+        <a href="{{ url_for('user.create_link') }}" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            New Link
+        </a>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-value">{{ total_links }}</div>
+            <div class="stat-label">Total Links</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ active_links }}</div>
+            <div class="stat-label">Active Links</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ total_clicks }}</div>
+            <div class="stat-label">Total Clicks</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ campaigns|length }}</div>
+            <div class="stat-label">Campaigns</div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h2>Recent Links</h2>
+                <a href="{{ url_for('user.links') }}" class="btn btn-ghost btn-sm">View all →</a>
+            </div>
+            {% if links %}
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>URL</th>
+                            <th>Short Code</th>
+                            <th>Clicks</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for link in links[:10] %}
+                        <tr>
+                            <td class="td-url">
+                                <a href="{{ link.original_url }}" target="_blank" rel="noopener noreferrer" class="url-truncated" title="{{ link.original_url }}">
+                                    {{ link.original_url[:50] }}{% if link.original_url|length > 50 %}...{% endif %}
+                                </a>
+                            </td>
+                            <td>
+                                <code class="short-code" id="code-{{ link.id }}">{{ link.short_code }}</code>
+                                <button class="btn-copy-sm" onclick="copyToClipboard('code-{{ link.id }}')" title="Copy short code" aria-label="Copy short code">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                    </svg>
+                                </button>
+                            </td>
+                            <td>{{ link.click_count }}</td>
+                            <td>
+                                {% if not link.is_active %}
+                                    <span class="badge badge-disabled">Disabled</span>
+                                {% elif link.is_expired() %}
+                                    <span class="badge badge-expired">Expired</span>
+                                {% else %}
+                                    <span class="badge badge-active">Active</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                    </svg>
+                </div>
+                <h3>No links yet</h3>
+                <p>Create your first short link to see it here.</p>
+                <a href="{{ url_for('user.create_link') }}" class="btn btn-primary">Create a Link</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h2>Quick Actions</h2>
+            </div>
+            <div class="quick-actions">
+                <a href="{{ url_for('user.create_link') }}" class="action-card">
+                    <div class="action-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                    </div>
+                    <h4>Create Link</h4>
+                    <p>Create a new shortened URL</p>
+                </a>
+                <a href="{{ url_for('campaigns.list_campaigns') }}" class="action-card">
+                    <div class="action-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                        </svg>
+                    </div>
+                    <h4>Campaigns</h4>
+                    <p>Organize links into campaigns</p>
+                </a>
+                <a href="{{ url_for('import_export.import_page') }}" class="action-card">
+                    <div class="action-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                    </div>
+                    <h4>Bulk Import</h4>
+                    <p>Import links from CSV</p>
+                </a>
+                <a href="{{ url_for('import_export.export_analytics') }}" class="action-card">
+                    <div class="action-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+                        </svg>
+                    </div>
+                    <h4>Export Data</h4>
+                    <p>Download analytics as CSV</p>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

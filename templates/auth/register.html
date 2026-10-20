@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Sign up — LinkPulse{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-card card">
+        <div class="auth-header">
+            <div class="auth-logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                </svg>
+                LinkPulse
+            </div>
+            <h1 class="auth-title">Create your account</h1>
+            <p class="auth-subtitle">Start managing your links in seconds.</p>
+        </div>
+        <form action="{{ url_for('auth.register') }}" method="POST">
+            <div class="form-group">
+                <label for="display_name" class="form-label">Display name</label>
+                <input type="text" id="display_name" name="display_name" class="form-input" required autofocus placeholder="Your name">
+            </div>
+            <div class="form-group">
+                <label for="email" class="form-label">Email address</label>
+                <input type="email" id="email" name="email" class="form-input" required autocomplete="email" placeholder="you@example.com">
+            </div>
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" id="password" name="password" class="form-input" required minlength="8" autocomplete="new-password" placeholder="At least 8 characters">
+            </div>
+            <div class="form-group">
+                <label for="confirm_password" class="form-label">Confirm password</label>
+                <input type="password" id="confirm_password" name="confirm_password" class="form-input" required minlength="8" autocomplete="new-password" placeholder="Repeat your password">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block btn-lg">Create account</button>
+        </form>
+        <div class="auth-footer">
+            <p>Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
